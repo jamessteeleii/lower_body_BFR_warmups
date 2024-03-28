@@ -1,0 +1,442 @@
+---
+title: "Model Structures, Checks, and Diagnostics"
+format: html
+---
+
+```{r} 
+#| message: false
+#| warning: false
+#| echo: false
+#| include: false
+
+knitr::opts_chunk$set(echo = TRUE, fig.align="center")
+
+library(tidyverse)
+library(performance)
+library(patchwork)
+
+```
+# Sit and Reach Model
+## Structure
+The model for sit and reach outcomes included fixed effects for condition ("Control", "Low BFR", "High BFR"), timepoint ("Pre", "Post"), and their interaction, as well as a fixed effect for measurement (i.e., at each timepoint and in each condition three measurements were taken) as there appeared to be an increase in sit and reach scores across measurements (see @fig-measurement).
+
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| label: fig-measurement 
+#| fig-width: 7.5
+#| fig-height: 10
+#| fig-cap: Individual participant data (thin lines) with means (points) an standard deviations (error bars).
+
+
+targets::tar_load(sit_reach_data)
+
+sit_reach_data <- sit_reach_data |>
+  mutate(
+    condition = case_when(
+      condition == "no" ~ "Control",
+      condition == "low" ~ "Low BFR",
+      condition == "high" ~ "High BFR"
+    ),
+    timepoint = factor(
+      case_when(
+        timepoint == 0 ~ "Pre",
+        timepoint == 1 ~ "Post"
+    ),
+    levels = c("Pre", "Post")
+    ),
+    condition_lab = "Condition",
+    timepoint_lab = "Timepoint"
+  )
+
+sit_reach_data |>
+  group_by(condition,measurement,timepoint) |>
+  summarise(mean = mean(value, na.rm=TRUE),
+            sd = sd(value, na.rm=TRUE)) |>
+  mutate(
+    condition_lab = "Condition",
+    timepoint_lab = "Timepoint"
+  ) |>
+  ggplot(aes(x=factor(measurement))) +
+  geom_line(data = sit_reach_data,
+            aes(y = value, group=interaction(condition, subject_number, timepoint)),
+            position = position_jitter(w=0.1),
+            alpha = 0.5, size = 0.5) +
+  geom_pointrange(aes(y=mean, ymin=mean-sd, ymax=mean+sd)) +
+  geom_line(aes(y=mean, group=interaction(condition, timepoint)),
+            size = 1) +
+  ggh4x::facet_nested(condition_lab + condition ~ timepoint_lab + timepoint) +
+  labs(
+    x = "Measurement",
+    y = "Sit and Reach (cm)"
+  ) + 
+  theme_bw()
+
+```
+In addition random intercepts for participants were included as well as random slopes for condition, timepoint, and their interaction, and also measurement. The model structure was therefore as follows:
+
+$$
+\tiny
+\begin{aligned}
+  \operatorname{value}_{i}  &\sim N \left(\mu, \sigma^2 \right) \\
+    \mu &=\alpha_{j[i]} + \beta_{1j[i]}(\operatorname{Condition}_{\operatorname{Low BFR}}) + \beta_{2j[i]}(\operatorname{Condition}_{\operatorname{High BFR}}) + \beta_{3j[i]}(\operatorname{Timepoint}) + \beta_{4j[i]}(\operatorname{Measurement}) + \beta_{5j[i]}(\operatorname{Condition}_{\operatorname{Low BFR}} \times \operatorname{Timepoint}) + \beta_{6j[i]}(\operatorname{Condition}_{\operatorname{High BFR}} \times \operatorname{Timepoint}) \\    
+\left(
+  \begin{array}{c} 
+    \begin{aligned}
+      &\alpha_{j} \\
+      &\beta_{1j} \\
+      &\beta_{2j} \\
+      &\beta_{3j} \\
+      &\beta_{4j} \\
+      &\beta_{5j} \\
+      &\beta_{6j}
+    \end{aligned}
+  \end{array}
+\right)
+  &\sim N \left(
+\left(
+  \begin{array}{c} 
+    \begin{aligned}
+      &\mu_{\alpha_{j}} \\
+      &\mu_{\beta_{1j}} \\
+      &\mu_{\beta_{2j}} \\
+      &\mu_{\beta_{3j}} \\
+      &\mu_{\beta_{4j}} \\
+      &\mu_{\beta_{5j}} \\
+      &\mu_{\beta_{6j}}
+    \end{aligned}
+  \end{array}
+\right)
+, 
+\left(
+  \begin{array}{ccccccc}
+     \sigma^2_{\alpha_{j}} & \rho_{\alpha_{j}\beta_{1j}} & \rho_{\alpha_{j}\beta_{2j}} & \rho_{\alpha_{j}\beta_{3j}} & \rho_{\alpha_{j}\beta_{4j}} & \rho_{\alpha_{j}\beta_{5j}} & \rho_{\alpha_{j}\beta_{6j}} \\ 
+     \rho_{\beta_{1j}\alpha_{j}} & \sigma^2_{\beta_{1j}} & \rho_{\beta_{1j}\beta_{2j}} & \rho_{\beta_{1j}\beta_{3j}} & \rho_{\beta_{1j}\beta_{4j}} & \rho_{\beta_{1j}\beta_{5j}} & \rho_{\beta_{1j}\beta_{6j}} \\ 
+     \rho_{\beta_{2j}\alpha_{j}} & \rho_{\beta_{2j}\beta_{1j}} & \sigma^2_{\beta_{2j}} & \rho_{\beta_{2j}\beta_{3j}} & \rho_{\beta_{2j}\beta_{4j}} & \rho_{\beta_{2j}\beta_{5j}} & \rho_{\beta_{2j}\beta_{6j}} \\ 
+     \rho_{\beta_{3j}\alpha_{j}} & \rho_{\beta_{3j}\beta_{1j}} & \rho_{\beta_{3j}\beta_{2j}} & \sigma^2_{\beta_{3j}} & \rho_{\beta_{3j}\beta_{4j}} & \rho_{\beta_{3j}\beta_{5j}} & \rho_{\beta_{3j}\beta_{6j}} \\ 
+     \rho_{\beta_{4j}\alpha_{j}} & \rho_{\beta_{4j}\beta_{1j}} & \rho_{\beta_{4j}\beta_{2j}} & \rho_{\beta_{4j}\beta_{3j}} & \sigma^2_{\beta_{4j}} & \rho_{\beta_{4j}\beta_{5j}} & \rho_{\beta_{4j}\beta_{6j}} \\ 
+     \rho_{\beta_{5j}\alpha_{j}} & \rho_{\beta_{5j}\beta_{1j}} & \rho_{\beta_{5j}\beta_{2j}} & \rho_{\beta_{5j}\beta_{3j}} & \rho_{\beta_{5j}\beta_{4j}} & \sigma^2_{\beta_{5j}} & \rho_{\beta_{5j}\beta_{6j}} \\ 
+     \rho_{\beta_{6j}\alpha_{j}} & \rho_{\beta_{6j}\beta_{1j}} & \rho_{\beta_{6j}\beta_{2j}} & \rho_{\beta_{6j}\beta_{3j}} & \rho_{\beta_{6j}\beta_{4j}} & \rho_{\beta_{6j}\beta_{5j}} & \sigma^2_{\beta_{6j}}
+  \end{array}
+\right)
+ \right)
+    \text{, for participant j = 1,} \dots \text{,J}
+\end{aligned}
+$$
+
+## Checks and Diagnostics
+Visual checks and diagnostics for the sit and reach model can be seen in @fig-check-sit-reach. 
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| label: fig-check-sit-reach
+#| fig-width: 10
+#| fig-height: 15
+#| fig-cap: Sit and reach model checks and diagnostics.
+
+targets::tar_load(sit_reach_model)
+
+check_model(sit_reach_model)
+
+```
+
+# Lactate Model
+## Structure
+The model for lactate outcomes used the log transformed lactate as the dependent variable (initial modelling using the raw values produced very poor posterior predictive checks) included fixed effects for condition ("Control", "Low BFR", "High BFR"), timepoint ("Pre", "Post"), and their interaction, as well random intercepts for participants. The model structure was therefore as follows:
+
+$$
+\begin{aligned}
+  \operatorname{value}_{i}  &\sim N \left(\mu, \sigma^2 \right) \\
+    \mu &=\alpha_{j[i]} + \beta_{1}(\operatorname{Condition}_{\operatorname{Low BFR}}) + \beta_{2}(\operatorname{Condition}_{\operatorname{High BFR}}) + \beta_{3}(\operatorname{Timepoint}) + \beta_{4}(\operatorname{Condition}_{\operatorname{Low BFR}} \times \operatorname{Timepoint}) + \beta_{5}(\operatorname{Condition}_{\operatorname{High BFR}} \times \operatorname{Timepoint}) \\
+    \alpha_{j}  &\sim N \left(\mu_{\alpha_{j}}, \sigma^2_{\alpha_{j}} \right)
+    \text{, for participant j = 1,} \dots \text{,J}
+\end{aligned}
+$$
+
+## Checks and Diagnostics
+Visual checks and diagnostics for the lactate model can be seen in @fig-check-lactate. 
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| label: fig-check-lactate
+#| fig-width: 10
+#| fig-height: 15
+#| fig-cap: Lactate model checks and diagnostics.
+
+targets::tar_load(lactate_model)
+
+check_model(lactate_model)
+
+```
+
+
+# Borg RPE Model
+## Structure
+The model for Borg RPE outcomes included only the fixed effect for condition ("Control", "Low BFR", "High BFR") due to there only being post warm-up values recorded, as well random intercepts for participants. The model structure was therefore as follows:
+
+$$
+\begin{aligned}
+  \operatorname{value}_{i}  &\sim N \left(\alpha_{j[i]} + \beta_{1}(\operatorname{Condition}_{\operatorname{Low BFR}}) + \beta_{2}(\operatorname{Condition}_{\operatorname{High BFR}}), \sigma^2 \right) \\
+    \alpha_{j}  &\sim N \left(\mu_{\alpha_{j}}, \sigma^2_{\alpha_{j}} \right)
+    \text{, for participant j = 1,} \dots \text{,J}
+\end{aligned}
+$$
+
+## Checks and Diagnostics
+Visual checks and diagnostics for the Borg RPE model can be seen in @fig-check-rpe. 
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| label: fig-check-rpe
+#| fig-width: 10
+#| fig-height: 15
+#| fig-cap: Borg RPE model checks and diagnostics.
+
+targets::tar_load(borg_rpe_model)
+
+check_model(borg_rpe_model)
+
+```
+
+# Heart Rate Model
+## Structure
+The model for heart rate outcomes included the fixed effect for condition ("Control", "Low BFR", "High BFR"), the time of recording in minutes during the warm-up, as well as their interaction. Random intercepts for participants were also included in addition to random slopes for condition, minute, and their interaction. The model structure was therefore as follows:
+
+$$
+\tiny
+\begin{aligned}
+  \operatorname{value}_{i}  &\sim N \left(\mu, \sigma^2 \right) \\
+    \mu &=\alpha_{j[i]} + \beta_{1j[i]}(\operatorname{Condition}_{\operatorname{Low BFR}}) + \beta_{2j[i]}(\operatorname{Condition}_{\operatorname{High BFR}}) + \beta_{3j[i]}(\operatorname{Minute}) + \beta_{4j[i]}(\operatorname{Condition}_{\operatorname{Low BFR}} \times \operatorname{Minute}) + \beta_{5j[i]}(\operatorname{Condition}_{\operatorname{High BFR}} \times \operatorname{Minute}) \\    
+\left(
+  \begin{array}{c} 
+    \begin{aligned}
+      &\alpha_{j} \\
+      &\beta_{1j} \\
+      &\beta_{2j} \\
+      &\beta_{3j} \\
+      &\beta_{4j} \\
+      &\beta_{5j}
+    \end{aligned}
+  \end{array}
+\right)
+  &\sim N \left(
+\left(
+  \begin{array}{c} 
+    \begin{aligned}
+      &\mu_{\alpha_{j}} \\
+      &\mu_{\beta_{1j}} \\
+      &\mu_{\beta_{2j}} \\
+      &\mu_{\beta_{3j}} \\
+      &\mu_{\beta_{4j}} \\
+      &\mu_{\beta_{5j}}
+    \end{aligned}
+  \end{array}
+\right)
+, 
+\left(
+  \begin{array}{cccccc}
+     \sigma^2_{\alpha_{j}} & \rho_{\alpha_{j}\beta_{1j}} & \rho_{\alpha_{j}\beta_{2j}} & \rho_{\alpha_{j}\beta_{3j}} & \rho_{\alpha_{j}\beta_{4j}} & \rho_{\alpha_{j}\beta_{5j}} \\ 
+     \rho_{\beta_{1j}\alpha_{j}} & \sigma^2_{\beta_{1j}} & \rho_{\beta_{1j}\beta_{2j}} & \rho_{\beta_{1j}\beta_{3j}} & \rho_{\beta_{1j}\beta_{4j}} & \rho_{\beta_{1j}\beta_{5j}} \\ 
+     \rho_{\beta_{2j}\alpha_{j}} & \rho_{\beta_{2j}\beta_{1j}} & \sigma^2_{\beta_{2j}} & \rho_{\beta_{2j}\beta_{3j}} & \rho_{\beta_{2j}\beta_{4j}} & \rho_{\beta_{2j}\beta_{5j}} \\ 
+     \rho_{\beta_{3j}\alpha_{j}} & \rho_{\beta_{3j}\beta_{1j}} & \rho_{\beta_{3j}\beta_{2j}} & \sigma^2_{\beta_{3j}} & \rho_{\beta_{3j}\beta_{4j}} & \rho_{\beta_{3j}\beta_{5j}} \\ 
+     \rho_{\beta_{4j}\alpha_{j}} & \rho_{\beta_{4j}\beta_{1j}} & \rho_{\beta_{4j}\beta_{2j}} & \rho_{\beta_{4j}\beta_{3j}} & \sigma^2_{\beta_{4j}} & \rho_{\beta_{4j}\beta_{5j}} \\ 
+     \rho_{\beta_{5j}\alpha_{j}} & \rho_{\beta_{5j}\beta_{1j}} & \rho_{\beta_{5j}\beta_{2j}} & \rho_{\beta_{5j}\beta_{3j}} & \rho_{\beta_{5j}\beta_{4j}} & \sigma^2_{\beta_{5j}}
+  \end{array}
+\right)
+ \right)
+    \text{, for participant j = 1,} \dots \text{,J}
+\end{aligned}
+$$
+
+## Checks and Diagnostics
+Visual checks and diagnostics for the heart rate model can be seen in @fig-check-heart. 
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| label: fig-check-heart
+#| fig-width: 10
+#| fig-height: 15
+#| fig-cap: Heart rate model checks and diagnostics.
+
+targets::tar_load(heart_rate_model)
+
+check_model(heart_rate_model)
+
+```
+
+# Countermovement Jump Model
+## Structure
+The model for countermovement jump outcomes included only the fixed effect for condition ("Control", "Low BFR", "High BFR") due to there only being post warm-up values recorded, as well random intercepts for participants and random slopes for condition. The model structure was therefore as follows. The model structure was therefore as follows:
+
+$$
+\begin{aligned}
+  \operatorname{value}_{i}  &\sim N \left(\alpha_{j[i]} + \beta_{1j[i]}(\operatorname{Condition}_{\operatorname{Low BFR}}) + \beta_{2j[i]}(\operatorname{Condition}_{\operatorname{High BFR}}), \sigma^2 \right) \\    
+\left(
+  \begin{array}{c} 
+    \begin{aligned}
+      &\alpha_{j} \\
+      &\beta_{1j} \\
+      &\beta_{2j}
+    \end{aligned}
+  \end{array}
+\right)
+  &\sim N \left(
+\left(
+  \begin{array}{c} 
+    \begin{aligned}
+      &\mu_{\alpha_{j}} \\
+      &\mu_{\beta_{1j}} \\
+      &\mu_{\beta_{2j}}
+    \end{aligned}
+  \end{array}
+\right)
+, 
+\left(
+  \begin{array}{ccc}
+     \sigma^2_{\alpha_{j}} & \rho_{\alpha_{j}\beta_{1j}} & \rho_{\alpha_{j}\beta_{2j}} \\ 
+     \rho_{\beta_{1j}\alpha_{j}} & \sigma^2_{\beta_{1j}} & \rho_{\beta_{1j}\beta_{2j}} \\ 
+     \rho_{\beta_{2j}\alpha_{j}} & \rho_{\beta_{2j}\beta_{1j}} & \sigma^2_{\beta_{2j}}
+  \end{array}
+\right)
+ \right)
+    \text{, for participant j = 1,} \dots \text{,J}
+\end{aligned}
+$$
+
+## Checks and Diagnostics
+Visual checks and diagnostics for the countermovement jump model can be seen in @fig-check-cmj. 
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| label: fig-check-cmj
+#| fig-width: 10
+#| fig-height: 15
+#| fig-cap: Heart rate model checks and diagnostics.
+
+targets::tar_load(cmj_model)
+
+check_model(cmj_model)
+
+```
+
+# Sprint Model
+## Structure
+The model for sprint outcomes included  the fixed effect for condition ("Control", "Low BFR", "High BFR"), distance covered in meters, and their interaction. Random intercepts for participants and random slopes for condition and distance were included (though their interaction was not due to it introducing singularity). The model structure was therefore as follows. The model structure was therefore as follows:
+
+$$
+\begin{aligned}
+  \operatorname{value}_{i}  &\sim N \left(\mu, \sigma^2 \right) \\
+    \mu &=\alpha_{j[i]} + \beta_{1j[i]}(\operatorname{Condition}_{\operatorname{Low BFR}}) + \beta_{2j[i]}(\operatorname{Condition}_{\operatorname{High BFR}}) + \beta_{3j[i]}(\operatorname{Distance}) + \beta_{4}(\operatorname{Condition}_{\operatorname{Low BFR}} \times \operatorname{Distance}) + \beta_{5}(\operatorname{Condition}_{\operatorname{High BFR}} \times \operatorname{Distance}) \\    
+\left(
+  \begin{array}{c} 
+    \begin{aligned}
+      &\alpha_{j} \\
+      &\beta_{1j} \\
+      &\beta_{2j} \\
+      &\beta_{3j}
+    \end{aligned}
+  \end{array}
+\right)
+  &\sim N \left(
+\left(
+  \begin{array}{c} 
+    \begin{aligned}
+      &\mu_{\alpha_{j}} \\
+      &\mu_{\beta_{1j}} \\
+      &\mu_{\beta_{2j}} \\
+      &\mu_{\beta_{3j}}
+    \end{aligned}
+  \end{array}
+\right)
+, 
+\left(
+  \begin{array}{cccc}
+     \sigma^2_{\alpha_{j}} & \rho_{\alpha_{j}\beta_{1j}} & \rho_{\alpha_{j}\beta_{2j}} & \rho_{\alpha_{j}\beta_{3j}} \\ 
+     \rho_{\beta_{1j}\alpha_{j}} & \sigma^2_{\beta_{1j}} & \rho_{\beta_{1j}\beta_{2j}} & \rho_{\beta_{1j}\beta_{3j}} \\ 
+     \rho_{\beta_{2j}\alpha_{j}} & \rho_{\beta_{2j}\beta_{1j}} & \sigma^2_{\beta_{2j}} & \rho_{\beta_{2j}\beta_{3j}} \\ 
+     \rho_{\beta_{3j}\alpha_{j}} & \rho_{\beta_{3j}\beta_{1j}} & \rho_{\beta_{3j}\beta_{2j}} & \sigma^2_{\beta_{3j}}
+  \end{array}
+\right)
+ \right)
+    \text{, for participant j = 1,} \dots \text{,J}
+\end{aligned}
+$$
+
+## Checks and Diagnostics
+Visual checks and diagnostics for the sprint model can be seen in @fig-check-sprint. 
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| label: fig-check-sprint
+#| fig-width: 10
+#| fig-height: 15
+#| fig-cap: Heart rate model checks and diagnostics.
+
+targets::tar_load(sprint_model)
+
+check_model(sprint_model)
+
+```
+
+# Isometric Mid Thigh Pull Model
+## Structure
+The model for isometric mid thigh pull outcomes included only the fixed effect for condition ("Control", "Low BFR", "High BFR") due to there only being post warm-up values recorded, as well random intercepts for participants and random slopes for condition. The model structure was therefore as follows. The model structure was therefore as follows:
+
+$$
+\begin{aligned}
+  \operatorname{value}_{i}  &\sim N \left(\alpha_{j[i]} + \beta_{1j[i]}(\operatorname{Condition}_{\operatorname{Low BFR}}) + \beta_{2j[i]}(\operatorname{Condition}_{\operatorname{High BFR}}), \sigma^2 \right) \\    
+\left(
+  \begin{array}{c} 
+    \begin{aligned}
+      &\alpha_{j} \\
+      &\beta_{1j} \\
+      &\beta_{2j}
+    \end{aligned}
+  \end{array}
+\right)
+  &\sim N \left(
+\left(
+  \begin{array}{c} 
+    \begin{aligned}
+      &\mu_{\alpha_{j}} \\
+      &\mu_{\beta_{1j}} \\
+      &\mu_{\beta_{2j}}
+    \end{aligned}
+  \end{array}
+\right)
+, 
+\left(
+  \begin{array}{ccc}
+     \sigma^2_{\alpha_{j}} & \rho_{\alpha_{j}\beta_{1j}} & \rho_{\alpha_{j}\beta_{2j}} \\ 
+     \rho_{\beta_{1j}\alpha_{j}} & \sigma^2_{\beta_{1j}} & \rho_{\beta_{1j}\beta_{2j}} \\ 
+     \rho_{\beta_{2j}\alpha_{j}} & \rho_{\beta_{2j}\beta_{1j}} & \sigma^2_{\beta_{2j}}
+  \end{array}
+\right)
+ \right)
+    \text{, for participant j = 1,} \dots \text{,J}
+\end{aligned}
+$$
+
+## Checks and Diagnostics
+Visual checks and diagnostics for the isometric mid thigh pull model can be seen in @fig-check-imtp. 
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| label: fig-check-imtp
+#| fig-width: 10
+#| fig-height: 15
+#| fig-cap: Heart rate model checks and diagnostics.
+
+targets::tar_load(imtp_model)
+
+check_model(imtp_model)
+
+```
