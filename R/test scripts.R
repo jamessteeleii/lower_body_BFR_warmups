@@ -1,156 +1,89 @@
 library(tidyverse)
 library(lme4)
+library(patchwork)
+
+targets::tar_load(c(
+  sit_reach_data,
+  lactate_data,
+  borg_rpe_data,
+  heart_rate_data,
+  cmj_data,
+  sprint_data,
+  imtp_data,
+  sit_reach_model,
+  lactate_model,
+  borg_rpe_model,
+  heart_rate_model,
+  cmj_model,
+  sprint_model,
+  imtp_model,
+  sit_reach_model_tidy,
+  lactate_model_tidy,
+  borg_rpe_model_tidy,
+  heart_rate_model_tidy,
+  cmj_model_tidy,
+  sprint_model_tidy,
+  imtp_model_tidy,
+  sit_reach_plot,
+  lactate_plot,
+  borg_rpe_plot,
+  heart_rate_plot,
+  cmj_plot,
+  sprint_plot,
+  imtp_plot
+))
+
+sit_reach_plot + 
+  guides(color = "none")
+
+(sit_reach_plot + 
+lactate_plot +
+borg_rpe_plot +
+heart_rate_plot +
+cmj_plot +
+sprint_plot +
+imtp_plot)
+
+((heart_rate_plot + guides(color = "none")) / (lactate_plot  | borg_rpe_plot))  +
+  plot_layout(guides = "collect")  +
+  plot_annotation(
+    tag_levels = "A",
+    title = "Effects of Warmup on Physiological and Perceptual Outcomes"
+  ) & 
+  theme(legend.position = "bottom")
 
 
-data <- read_csv("data/Overall.csv") |>
-  janitor::clean_names() 
-
-sit_reach_data <- data |>
-  select(subject_number, contains("sit_reach")) |>
-  pivot_longer(cols = !subject_number, names_to = "name", values_to = "value") |>
-  separate("name", into = c("condition", "x", "y", "timepoint"), sep = "_") |>
-  select(-x,-y) |>
-  separate(timepoint, 
-           into = c("timepoint", "measurement"), 
-           sep = "(?<=[A-Za-z])(?=[0-9])"
-  ) |>
-  mutate(
-    timepoint = as.numeric(
-      case_when(
-        timepoint == "pre" ~ 0,
-        timepoint == "post" ~1
-      )
-    )
-  ) |>
-  mutate(condition = factor(condition, levels= c("no", "low", "high")),
-         measurement = as.numeric(measurement))
-
-lactate_data <- data |>
-  select(subject_number, contains("lact")) |>
-  pivot_longer(cols = !subject_number, names_to = "name", values_to = "value") |>
-  separate("name", into = c("condition", "timepoint", "x"), sep = "_") |>
-  select(-x)  |>
-  mutate(
-    timepoint = as.numeric(
-      case_when(
-        timepoint == "pre" ~ 0,
-        timepoint == "post" ~1
-      )
-    )
-  ) |>
-  mutate(condition = factor(condition, levels= c("no", "low", "high")))
-
-heart_rate_data <- data |>
-  select(subject_number, contains("hr")) |>
-  select(-contains("mean")) |>
-  pivot_longer(cols = !subject_number, names_to = "name", values_to = "value") |>
-  separate("name", into = c("condition", "measurement"), sep = "_") |>
-  separate(measurement, 
-           into = c("x", "measurement"), 
-           sep = "(?<=[A-Za-z])(?=[0-9])"
-  ) |>
-  select(-x) |>
-  mutate(condition = factor(condition, levels= c("no", "low", "high")),
-         measurement = as.numeric(measurement))
-
-cmj_data <- data |>
-  select(subject_number, contains("cmj")) |>
-  select(-contains("mean")) |>
-  pivot_longer(cols = !subject_number, names_to = "name", values_to = "value") |>
-  separate("name", into = c("condition", "measurement"), sep = "_") |>
-  separate(measurement, 
-           into = c("x", "measurement"), 
-           sep = "(?<=[A-Za-z])(?=[0-9])"
-  ) |>
-  select(-x) |>
-  mutate(condition = factor(condition, levels= c("no", "low", "high")))
+ggsave("warmup.tiff",
+       device = "tiff",
+       dpi = 300,
+       w = 10,
+       h = 10)
 
 
-sprint_data <- data |>
-  select(subject_number, contains("m_")) |>
-  select(-contains("mean")) |>
-  pivot_longer(cols = !subject_number, names_to = "name", values_to = "value") |>
-  separate("name", into = c("condition", "distance", "measurement"), sep = "_") |>
-  mutate(condition = factor(condition, levels= c("no", "low", "high")))
+((sit_reach_plot + guides(color = "none")) + cmj_plot + sprint_plot + imtp_plot) +  
+plot_layout(guides = "collect")  +
+  plot_annotation(
+    tag_levels = "A",
+    title = "Effects of Warmup on Performance Outcomes"
+  ) & 
+  theme(legend.position = "bottom")
 
-imtp_data <- data |>
-  select(subject_number, contains("imtp")) |>
-  select(-contains("mean")) |>
-  pivot_longer(cols = !subject_number, names_to = "name", values_to = "value") |>
-  separate("name", into = c("condition", "x", "measurement"), sep = "_") |>
-  select(-x) |> 
-  separate(measurement, 
-           into = c("x", "measurement"), 
-           sep = "(?<=[A-Za-z])(?=[0-9])"
-  ) |>
-  select(-x)  |>
-  mutate(condition = factor(condition, levels= c("no", "low", "high")))
+ggsave("perform.tiff",
+       device = "tiff",
+       dpi = 300,
+       w = 10,
+       h = 10)
 
 
-### Fit models for each outcome
-
-# sit and reach
-
-sit_reach_model <- lmer(value ~ condition*timepoint + (1 | subject_number),
-                        data = sit_reach_data,
-                        REML = TRUE)
-
-sjPlot::plot_model(sit_reach_model, type = "pred", terms = c("condition", "timepoint"),
-                   show.data = TRUE, jitter = TRUE)
-
-sjPlot::plot_model(sit_reach_model)
-
-# lactate
-lactate_model <- lmer(value ~ condition*timepoint + (1 | subject_number),
-                        data = lactate_data,
-                        REML = TRUE)
 
 
-sjPlot::plot_model(lactate_model, type = "pred", terms = c("condition", "timepoint"),
-                   show.data = TRUE, jitter = TRUE)
 
-sjPlot::plot_model(lactate_model)
-
-# heart rate
-heart_rate_model <- lmer(value ~ condition*measurement + (measurement | subject_number),
-                      data = heart_rate_data,
-                      REML = TRUE)
+ggsave("sit_reach_plot.tiff",
+       device = "tiff",
+       dpi = 300,
+       w = 5,
+       h = 2.5)
 
 
-sjPlot::plot_model(heart_rate_model, type = "pred", terms = c("measurement", "condition"),
-                   show.data = TRUE, jitter = TRUE)
-
-sjPlot::plot_model(heart_rate_model)
-
-# cmj
-cmj_model <- lmer(value ~ condition + (1 | subject_number),
-                         data = cmj_data,
-                         REML = TRUE)
 
 
-sjPlot::plot_model(cmj_model, type = "pred", terms = "condition",
-                   show.data = TRUE, jitter = TRUE)
-
-sjPlot::plot_model(cmj_model)
-
-# sprint
-sprint_model <- lmer(value ~ condition*distance + (1 | subject_number),
-                  data = sprint_data,
-                  REML = TRUE)
-
-
-sjPlot::plot_model(sprint_model, type = "pred", terms = c("distance", "condition"),
-                   show.data = TRUE, jitter = TRUE)
-
-sjPlot::plot_model(sprint_model)
-
-# imtp
-imtp_model <- lmer(value ~ condition + (1 | subject_number),
-                  data = imtp_data,
-                  REML = TRUE)
-
-
-sjPlot::plot_model(imtp_model, type = "pred", terms = "condition",
-                   show.data = TRUE, jitter = TRUE)
-
-sjPlot::plot_model(imtp_model)

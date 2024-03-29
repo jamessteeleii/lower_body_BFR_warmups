@@ -55,14 +55,34 @@ list(
   tar_target(sprint_model, fit_sprint_model(sprint_data)),
   tar_target(imtp_model, fit_imtp_model(imtp_data)),
   
-  # tidy models
+  # Tidy models
   tar_target(sit_reach_model_tidy, tidy(sit_reach_model)),
   tar_target(lactate_model_tidy, tidy(lactate_model)),
   tar_target(borg_rpe_model_tidy, tidy(borg_rpe_model)),
   tar_target(heart_rate_model_tidy, tidy(heart_rate_model)),
   tar_target(cmj_model_tidy, tidy(cmj_model)),
   tar_target(sprint_model_tidy, tidy(sprint_model)),
-  tar_target(imtp_model_tidy, tidy(imtp_model)),
+  tar_target(imtp_model_tidy, tidy(imtp_model)), 
+  
+  # Make plots
+  tar_target(sit_reach_plot, plot_sit_reach(sit_reach_data,sit_reach_model)),
+  tar_target(lactate_plot, plot_lactate(lactate_data,lactate_model)),
+  tar_target(borg_rpe_plot, plot_borg_rpe(borg_rpe_data,borg_rpe_model)),
+  tar_target(heart_rate_plot, plot_heart_rate(heart_rate_data,heart_rate_model)),
+  tar_target(cmj_plot, plot_cmj(cmj_data,cmj_model)),
+  tar_target(sprint_plot, plot_sprint(sprint_data,sprint_model)),
+  tar_target(imtp_plot, plot_imtp(imtp_data,imtp_model)),
+  
+  # Combine plots for manuscript
+  tar_target(warmup_plot, combine_warmup_plots(heart_rate_plot, lactate_plot, borg_rpe_plot)),
+  tar_target(performance_plot, combine_performance_plots(sit_reach_plot, cmj_plot, sprint_plot, imtp_plot)),
+  
+  # Save plots as tiffs for manuscript
+  tar_target(warmup_tiff, ggsave(plot = warmup_plot, filename = "plots/warmup_plot.tiff",
+                                 dpi = 300, w = 10, h = 10)),
+  tar_target(performance_tiff, ggsave(plot = performance_plot, filename = "plots/performance_plot.tiff",
+                                 dpi = 300, w = 10, h = 10)),
+  
   
   
   # 
