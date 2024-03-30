@@ -1,6 +1,6 @@
 ---
 title: "Model Structures, Checks, and Diagnostics"
-format: html
+format: pdf
 ---
 
 ```{r} 
