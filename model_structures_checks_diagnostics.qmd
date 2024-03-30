@@ -1,6 +1,6 @@
 ---
 title: "Model Structures, Checks, and Diagnostics"
-format: pdf
+format: html
 ---
 
 ```{r} 
@@ -16,6 +16,7 @@ library(performance)
 library(patchwork)
 
 ```
+
 # Sit and Reach Model
 ## Structure
 The model for sit and reach outcomes included fixed effects for condition ("Control", "Low BFR", "High BFR"), timepoint ("Pre", "Post"), and their interaction, as well as a fixed effect for measurement (i.e., at each timepoint and in each condition three measurements were taken) as there appeared to be an increase in sit and reach scores across measurements (see @fig-measurement).
@@ -147,6 +148,7 @@ check_model(sit_reach_model)
 The model for lactate outcomes used the log transformed lactate as the dependent variable (initial modelling using the raw values produced very poor posterior predictive checks) included fixed effects for condition ("Control", "Low BFR", "High BFR"), timepoint ("Pre", "Post"), and their interaction, as well random intercepts for participants. The model structure was therefore as follows:
 
 $$
+\small
 \begin{aligned}
   \operatorname{value}_{i}  &\sim N \left(\mu, \sigma^2 \right) \\
     \mu &=\alpha_{j[i]} + \beta_{1}(\operatorname{Condition}_{\operatorname{Low BFR}}) + \beta_{2}(\operatorname{Condition}_{\operatorname{High BFR}}) + \beta_{3}(\operatorname{Timepoint}) + \beta_{4}(\operatorname{Condition}_{\operatorname{Low BFR}} \times \operatorname{Timepoint}) + \beta_{5}(\operatorname{Condition}_{\operatorname{High BFR}} \times \operatorname{Timepoint}) \\
@@ -330,6 +332,7 @@ check_model(cmj_model)
 The model for sprint outcomes included  the fixed effect for condition ("Control", "Low BFR", "High BFR"), distance covered in meters, and their interaction. Random intercepts for participants and random slopes for condition and distance were included (though their interaction was not due to it introducing singularity). The model structure was therefore as follows. The model structure was therefore as follows:
 
 $$
+\tiny
 \begin{aligned}
   \operatorname{value}_{i}  &\sim N \left(\mu, \sigma^2 \right) \\
     \mu &=\alpha_{j[i]} + \beta_{1j[i]}(\operatorname{Condition}_{\operatorname{Low BFR}}) + \beta_{2j[i]}(\operatorname{Condition}_{\operatorname{High BFR}}) + \beta_{3j[i]}(\operatorname{Distance}) + \beta_{4}(\operatorname{Condition}_{\operatorname{Low BFR}} \times \operatorname{Distance}) + \beta_{5}(\operatorname{Condition}_{\operatorname{High BFR}} \times \operatorname{Distance}) \\    
