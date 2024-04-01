@@ -56,13 +56,13 @@ list(
   tar_target(imtp_model, fit_imtp_model(imtp_data)),
   
   # Tidy models
-  tar_target(sit_reach_model_tidy, tidy(sit_reach_model)),
-  tar_target(lactate_model_tidy, tidy(lactate_model)),
-  tar_target(borg_rpe_model_tidy, tidy(borg_rpe_model)),
-  tar_target(heart_rate_model_tidy, tidy(heart_rate_model)),
-  tar_target(cmj_model_tidy, tidy(cmj_model)),
-  tar_target(sprint_model_tidy, tidy(sprint_model)),
-  tar_target(imtp_model_tidy, tidy(imtp_model)), 
+  tar_target(sit_reach_model_tidy, tidy(sit_reach_model, conf.int = TRUE)),
+  tar_target(lactate_model_tidy, tidy(lactate_model, conf.int = TRUE)),
+  tar_target(borg_rpe_model_tidy, tidy(borg_rpe_model, conf.int = TRUE)),
+  tar_target(heart_rate_model_tidy, tidy(heart_rate_model, conf.int = TRUE)),
+  tar_target(cmj_model_tidy, tidy(cmj_model, conf.int = TRUE)),
+  tar_target(sprint_model_tidy, tidy(sprint_model, conf.int = TRUE)),
+  tar_target(imtp_model_tidy, tidy(imtp_model, conf.int = TRUE)), 
   
   # Make plots
   tar_target(sit_reach_plot, plot_sit_reach(sit_reach_data,sit_reach_model)),

@@ -1,12 +1,12 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
-.Random.seed|object|9e65878d500fc8c1|||||||||||||||
+.Random.seed|object|546ed2b99d0fb7dd|||||||||||||||
 borg_rpe_data|stem|050b2a6dc75ac76b|a7e88f83b0ff435c|2bca14184c26555e|-1498703411||t19810.5275444282s|b4cfbff6ad8d48ed|358|rds|local|vector|||0.02||
 borg_rpe_model|stem|c6005e11e5052394|93dde08434510d26|52133a87ac88bbba|-188030887||t19810.6116470698s|a8baf49e70b1be1e|137684|rds|local|vector|||0.03||
-borg_rpe_model_tidy|stem|964947303419c5ac|6d5ea98e053e4d0d|b35958d24e9c6db8|76864134||t19810.6116637677s|1c0ad539cb0fc235|451|rds|local|vector|||0.02||
+borg_rpe_model_tidy|stem|5c8f59647bfeac0d|ce4cec6358ec29ea|b35958d24e9c6db8|76864134||t19812.5595786711s|5113d0056c90d5c1|518|rds|local|vector|||0.05||
 borg_rpe_plot|stem|4a5714d6227ade48|a8a9e40c33aeaaae|1a820a5fbdd1aef9|-643262051||t19811.4881385164s|6500445b2a66525b|311516|rds|local|vector|||0.38|Using size aesthetic for lines was deprecated in ggplot2 3.4.0.ℹ Please use linewidth instead.|
 cmj_data|stem|19ebcb08962dbf52|e5ebd6c146ad5926|b85089583378581a|1700829895||t19810.5275426105s|ba984c08f1495aa7|768|rds|local|vector|||0.02||
 cmj_model|stem|4177ca63b1ad3f1e|34af22cb30e9464f|74d0bee06b5cd5fc|-1491467172||t19810.6116245478s|e7ab7e0faec54aa4|146028|rds|local|vector|||0.08||
-cmj_model_tidy|stem|332d0558ad3ab6ab|adab03b023e25df3|0d01cd7aab853b73|-1694868540||t19810.6116628804s|cfd16e39f2a8db5b|544|rds|local|vector|||0.02||
+cmj_model_tidy|stem|20594b307f6cab6f|977964a125541eb7|0d01cd7aab853b73|-1694868540||t19812.5599733772s|a0669c72be07cb49|610|rds|local|vector|||0.04||
 cmj_plot|stem|fe97f66833e19e44|2ca6a7b97dcf402c|411424d54b9d50cb|499018266||t19811.4589438755s|90375a2175dd1559|274282|rds|local|vector|||0.22||
 combine_performance_plots|function|8475c7174c1e0aa6|||||||||||||||
 combine_warmup_plots|function|c7a1537707a33f49|||||||||||||||
@@ -21,17 +21,17 @@ fit_sit_reach_model|function|2b418bf1e5764bf3|||||||||||||||
 fit_sprint_model|function|7c3da023c3ed2a6f|||||||||||||||
 heart_rate_data|stem|bebb853dae0ebbbd|453b7aa95743cb6a|5bbe2307cbde8306|-576446077||t19810.5275432963s|0fff11a5ccfcaa9e|2196|rds|local|vector|||0.03||
 heart_rate_model|stem|60790cf4bbc58702|14238fe722a44f77|95ada6cdf869f495|-1371195304||t19810.611646015s|80994b3f56dc783c|219982|rds|local|vector|||1.56||
-heart_rate_model_tidy|stem|a803812c863f2e7b|5405ddda007c6c12|81171829e5d338b8|1627592090||t19810.6116635476s|06404c5c64f60b63|922|rds|local|vector|||0.01||
+heart_rate_model_tidy|stem|9fe26cf933d17e6a|cfceaff846f03984|81171829e5d338b8|1627592090||t19812.5595805042s|bb09704b2370887b|1046|rds|local|vector|||0.01||
 heart_rate_plot|stem|207af224ef6caea7|7aefd968586aee42|d5783e657cd40484|-1690217018||t19811.4589398367s|995ac05e54d61ccc|392189|rds|local|vector|||0.5|Using size aesthetic for lines was deprecated in ggplot2 3.4.0.ℹ Please use linewidth instead.|
 imtp_data|stem|27d0f9f390ec1e8e|90886fa72d0b2800|71a2ba223091cb6e|1089406397||t19810.5275428676s|d4d0bc4a1b2d8df9|827|rds|local|vector|||0.02||
 imtp_model|stem|e56babefd365cbe7|5f493e697e18ac4f|45ba2c94e092fd31|-2110149105||t19810.6116260912s|42dd2a7b04b02230|145240|rds|local|vector|||0.06||
-imtp_model_tidy|stem|42aa86343872da53|b2a23a9b23c62c7d|1e8961e8aac193a4|1097798889||t19810.6116630773s|9264840afbbafcaf|542|rds|local|vector|||0.01||
+imtp_model_tidy|stem|d4dd7afdd5174e78|afb23bf98fd47669|1e8961e8aac193a4|1097798889||t19812.5595792168s|6780c20ed7ba8483|607|rds|local|vector|||0.01||
 imtp_plot|stem|df4e8f7542bc5a9f|1183e4fdb111fe92|1c065aa66849c290|-1411291160||t19811.4589521638s|25b6108659565ff8|272819|rds|local|vector|||0.24||
 lactate_data|stem|224bb4f504bbdd6e|55671daa61a7348c|cc1e30f199322805|-31436662||t19810.5275436206s|be91d6af8b5b13e0|579|rds|local|vector|||0.02||
 lactate_model|stem|ed17e49658eb3525|ae4e608d0fb74044|efd00dcb3aefcd69|-800882933||t19810.6722415011s|1a5aa421c3418a59|141537|rds|local|vector|||0.05||
-lactate_model_tidy|stem|5dfd21de3587c353|037e1aebd0c36692|fc6daa8eddc64952|1211803541||t19810.6722419667s|452b5bd7edb6886a|583|rds|local|vector|||0.02||
+lactate_model_tidy|stem|c22a1af4238414dd|88b4ae7c07474d31|fc6daa8eddc64952|1211803541||t19812.5595810834s|72687070e44f8593|706|rds|local|vector|||0.02||
 lactate_plot|stem|339c4bc9dc7bb1e3|35ba99cb662b6865|aef85ea32a285da0|-255862714||t19811.458948107s|cde0fa0eaee49b6a|267643|rds|local|vector|||0.25||
-model_structures_checks_diagnostics|stem|9c21c3af083583b8|f12fcefc5b2f7e58|7fcdfc2a1b7ef88f|-1231450837|model_structures_checks_diagnostics.html*model_structures_checks_diagnostics_files*model_structures_checks_diagnostics.qmd|t19810.6981807954s|3212c6d4a4a86c51|52276|file|local|vector|||33.03||
+model_structures_checks_diagnostics|stem|a71fa5b07bb8c33f|f12fcefc5b2f7e58|7fcdfc2a1b7ef88f|-1231450837|model_structures_checks_diagnostics.html*model_structures_checks_diagnostics_files*model_structures_checks_diagnostics.qmd|t19812.559972625s|ce13151f666f2013|2490108|file|local|vector|||33.7||
 performance_plot|stem|03265f8765ba7b54|c6ba01e5724b423e|d6c825e7ba229bd8|1406073675||t19811.4881528209s|bb76d5271bba286f|1175799|rds|local|vector|||0||
 performance_tiff|stem|477222270ad9d34b|1d0bf02c8c2f58aa|eab482ffd363f691|-1589459622||t19811.4881694836s|c852eab37a726e04|78|rds|local|vector|||0.68|Removed 3 rows containing missing values or values outside the scale rangegeom_line.. Removed 18 rows containing missing values or values outside the scale rangegeom_line.|
 plot_borg_rpe|function|469a5d151143a798|||||||||||||||
@@ -51,11 +51,11 @@ prepare_sprint_data|function|807b08f90118072a|||||||||||||||
 read_data|function|e76e29739b0da4fe|||||||||||||||
 sit_reach_data|stem|17bd187572b608cb|0f6d9551e131b3e4|55c80efec9b86715|732708838||t19810.5275442312s|614b8e67060edffe|819|rds|local|vector|||0.02||
 sit_reach_model|stem|d26c4d2cafabacbf|5a06322a2755d0a4|6262a03965dfdb63|-65167632||t19810.6116623127s|22360df903a1574a|184572|rds|local|vector|||1.27||
-sit_reach_model_tidy|stem|06ac5f78c0d3f8bc|d5ca1e8815d5fc42|1fa4a1e820728fd8|-1362068460||t19810.611664011s|d3389aeddb1f6897|1066|rds|local|vector|||0.01||
+sit_reach_model_tidy|stem|ca8167eae1e84e51|8b0d29aad51896ad|1fa4a1e820728fd8|-1362068460||t19812.5595823902s|5d6834ad5b5a0116|1209|rds|local|vector|||0.09||
 sit_reach_plot|stem|620e66ca7a271590|55a214481e743cb3|57f6a28113d8b77d|429992152||t19811.4589565748s|27fba48a4d038331|313145|rds|local|vector|||0.25||
 sprint_data|stem|4d3c98135621f998|fc682404d79a29fd|84640fa9c39c1b8d|1597324357||t19810.6130185269s|54ec57d7c187309f|1583|rds|local|vector|||0.03||
 sprint_model|stem|37d8747a15d3a6d5|6e163233c3578568|696ca5cb111adf12|-1440076586||t19810.6130229154s|43857d96306511e8|168909|rds|local|vector|||0.32||
-sprint_model_tidy|stem|10158bc0c2fbd11a|45bd4608e3909269|9e3d2834105b772d|35029480||t19810.6130233111s|938fc0a6010d13b8|756|rds|local|vector|||0||
+sprint_model_tidy|stem|b4f776e584624b61|a456cbcc2872955a|9e3d2834105b772d|35029480||t19812.5595799125s|6fb3b1e9fcff11ca|877|rds|local|vector|||0.04||
 sprint_plot|stem|58b2a0bfe37ad811|f41c9c84757f2b8b|ad0993b85dff3e4b|2039728288||t19811.4625811212s|6f0d9b9aafb70319|308656|rds|local|vector|||0.25||
 warmup_plot|stem|56655eeb90ce0c0c|58bd79daacbcd35e|a31331f1715186f6|-1798853015||t19811.4881438902s|07401e46405d8ff0|966383|rds|local|vector|||0||
 warmup_tiff|stem|64c050f7315f98b0|a1f3434f9699f5ae|1d7de1ad8360d893|786529392||t19811.488161682s|5507944482a0fcc9|73|rds|local|vector|||0.76|Removed 51 rows containing missing values or values outside the scale rangegeom_line.|

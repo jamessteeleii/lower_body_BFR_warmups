@@ -1,0 +1,89 @@
+---
+title: "Model Summaries"
+format: html
+---
+```{r} 
+#| message: false
+#| warning: false
+#| echo: false
+#| include: false
+
+knitr::opts_chunk$set(echo = TRUE, fig.align="center")
+
+
+targets::tar_load(c(
+  sit_reach_model,
+  lactate_model,
+  borg_rpe_model,
+  heart_rate_model,
+  cmj_model,
+  sprint_model,
+  imtp_model
+))
+
+```
+
+# Effects of Warm-up on Physiological and Perceptual Outcomes
+## Heart Rate
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+
+sjPlot::tab_model(heart_rate_model, dv.labels = "Heart Rate (bpm)")
+```
+
+## Lactate
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+
+sjPlot::tab_model(lactate_model, dv.labels = "Lactate (mmol.L)", transform = "exp")
+```
+
+## Rating of Perceived Exertion
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+
+sjPlot::tab_model(borg_rpe_model, dv.labels = "Rating of Perceived Exertion (6-20 scale)")
+```
+
+# Effects of Warm-up on Performance Outcomes
+## Sit and Reach
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+
+sjPlot::tab_model(sit_reach_model, dv.labels = "Sit and Reach (cm)")
+```
+
+## Countermovement Jump
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+
+sjPlot::tab_model(cmj_model, dv.labels = "Countermovement Jump (cm)")
+```
+
+## Sprints
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+
+sjPlot::tab_model(sprint_model, dv.labels = "Sprint Time (seconds)")
+```
+
+## Isometric Mid Thigh Pull
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+
+sjPlot::tab_model(imtp_model, dv.labels = "IMTP Force (N)")
+```
