@@ -1,5 +1,5 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
-.Random.seed|object|546ed2b99d0fb7dd|||||||||||||||
+.Random.seed|object|476fec804ca9c823|||||||||||||||
 borg_rpe_data|stem|050b2a6dc75ac76b|a7e88f83b0ff435c|2bca14184c26555e|-1498703411||t19810.5275444282s|b4cfbff6ad8d48ed|358|rds|local|vector|||0.02||
 borg_rpe_model|stem|c6005e11e5052394|93dde08434510d26|52133a87ac88bbba|-188030887||t19810.6116470698s|a8baf49e70b1be1e|137684|rds|local|vector|||0.03||
 borg_rpe_model_tidy|stem|5c8f59647bfeac0d|ce4cec6358ec29ea|b35958d24e9c6db8|76864134||t19812.5595786711s|5113d0056c90d5c1|518|rds|local|vector|||0.05||
@@ -31,7 +31,8 @@ lactate_data|stem|224bb4f504bbdd6e|55671daa61a7348c|cc1e30f199322805|-31436662||
 lactate_model|stem|ed17e49658eb3525|ae4e608d0fb74044|efd00dcb3aefcd69|-800882933||t19810.6722415011s|1a5aa421c3418a59|141537|rds|local|vector|||0.05||
 lactate_model_tidy|stem|c22a1af4238414dd|88b4ae7c07474d31|fc6daa8eddc64952|1211803541||t19812.5595810834s|72687070e44f8593|706|rds|local|vector|||0.02||
 lactate_plot|stem|339c4bc9dc7bb1e3|35ba99cb662b6865|aef85ea32a285da0|-255862714||t19811.458948107s|cde0fa0eaee49b6a|267643|rds|local|vector|||0.25||
-model_structures_checks_diagnostics|stem|a71fa5b07bb8c33f|f12fcefc5b2f7e58|7fcdfc2a1b7ef88f|-1231450837|model_structures_checks_diagnostics.html*model_structures_checks_diagnostics_files*model_structures_checks_diagnostics.qmd|t19812.559972625s|ce13151f666f2013|2490108|file|local|vector|||33.7||
+model_structures_checks_diagnostics|stem|a71fa5b07bb8c33f|f12fcefc5b2f7e58|7fcdfc2a1b7ef88f|-1231450837|model_structures_checks_diagnostics.html*model_structures_checks_diagnostics_files*model_structures_checks_diagnostics.qmd|t19812.5599726365s|bd50757daacf1ffd|52306|file|local|vector|||33.7||
+model_summaries|stem|69bba0761548271a|5f30069f8fa9829e|b970a5e0c6ec36fa|-583592585|model_summaries.html*model_summaries_files*model_summaries.qmd|t19814.7577666746s|39e3a017fadfea5f|60425|file|local|vector|||10.89||
 performance_plot|stem|03265f8765ba7b54|c6ba01e5724b423e|d6c825e7ba229bd8|1406073675||t19811.4881528209s|bb76d5271bba286f|1175799|rds|local|vector|||0||
 performance_tiff|stem|477222270ad9d34b|1d0bf02c8c2f58aa|eab482ffd363f691|-1589459622||t19811.4881694836s|c852eab37a726e04|78|rds|local|vector|||0.68|Removed 3 rows containing missing values or values outside the scale rangegeom_line.. Removed 18 rows containing missing values or values outside the scale rangegeom_line.|
 plot_borg_rpe|function|469a5d151143a798|||||||||||||||
@@ -57,5 +58,6 @@ sprint_data|stem|4d3c98135621f998|fc682404d79a29fd|84640fa9c39c1b8d|1597324357||
 sprint_model|stem|37d8747a15d3a6d5|6e163233c3578568|696ca5cb111adf12|-1440076586||t19810.6130229154s|43857d96306511e8|168909|rds|local|vector|||0.32||
 sprint_model_tidy|stem|b4f776e584624b61|a456cbcc2872955a|9e3d2834105b772d|35029480||t19812.5595799125s|6fb3b1e9fcff11ca|877|rds|local|vector|||0.04||
 sprint_plot|stem|58b2a0bfe37ad811|f41c9c84757f2b8b|ad0993b85dff3e4b|2039728288||t19811.4625811212s|6f0d9b9aafb70319|308656|rds|local|vector|||0.25||
+stats_results|stem||39a9bb2c9ad2bd2e|3a86fadf2d6a8078|1637744033||t19814.7583325001s||0|file|local|vector|||48.15||Error running quarto cli.ℹ Rerun with quiet  FALSE to see the full error message.Caused by error System command quarto.exe failed
 warmup_plot|stem|56655eeb90ce0c0c|58bd79daacbcd35e|a31331f1715186f6|-1798853015||t19811.4881438902s|07401e46405d8ff0|966383|rds|local|vector|||0||
 warmup_tiff|stem|64c050f7315f98b0|a1f3434f9699f5ae|1d7de1ad8360d893|786529392||t19811.488161682s|5507944482a0fcc9|73|rds|local|vector|||0.76|Removed 51 rows containing missing values or values outside the scale rangegeom_line.|

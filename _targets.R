@@ -114,11 +114,13 @@ list(
   # tar_target(thresholds_agree_plot_tiff, make_thresholds_agree_plot_tiff(thresholds_agree_plot))
 
   ##### Reporting
-  # Render the report
-  # tar_quarto(report, "report.qmd")
+  # Render the stats and results
+  tar_quarto(stats_results, "stats_results.qmd"),
   
   # Render the supplementary material
-  tar_quarto(model_structures_checks_diagnostics, "model_structures_checks_diagnostics.qmd")
+  tar_quarto(model_structures_checks_diagnostics, "model_structures_checks_diagnostics.qmd"),
+  tar_quarto(model_summaries, "model_summaries.qmd")
+  
 
 
 )

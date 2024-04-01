@@ -21,6 +21,7 @@ knitr::opts_chunk$set(echo = TRUE, fig.align="center")
 options(knitr.kable.NA = '')
 
 library(tidyverse)
+library(modelbased)
 library(kableExtra)
 library(ggtext)
 library(patchwork)
@@ -38,6 +39,13 @@ The present analysis was not pre-registered as we had no a priori hypotheses and
 #| echo: false
 
 targets::tar_load(c(
+  sit_reach_model,
+  lactate_model,
+  borg_rpe_model,
+  heart_rate_model,
+  cmj_model,
+  sprint_model,
+  imtp_model,
   sit_reach_model_tidy,
   lactate_model_tidy,
   borg_rpe_model_tidy,
@@ -82,7 +90,7 @@ Full model summaries including all fixed effect parameter estimates, their confi
 #| label: fig-warmup 
 #| fig-width: 10
 #| fig-height: 10
-#| fig-cap: ADD TEXT.
+#| fig-cap: Individual participant and measurement level data (thin lines) with model predicted values and 95% confidence intervals (thick lines and bands OR points and error bars). Panel (A) shows the results for heart rate, panel (B) shows the results for blood lactate, and panel (C) shows the results for rating of perceived exertion.
 
 targets::tar_load(heart_rate_plot)
 targets::tar_load(lactate_plot)
@@ -98,13 +106,144 @@ targets::tar_load(borg_rpe_plot)
 ```
 
 ### Heart Rate
-On average heart rate was typically higher during the high BFR condition compared with the control condition (beats.minute$^{-1}$ = `r heart_rate_model_tidy$estimate[3]` [95% CI: `r heart_rate_model_tidy$conf.low[3]`, `r heart_rate_model_tidy$conf.high[3]`]), though not clearly so with the low BFR condition (beats.minute$^{-1}$ = `r heart_rate_model_tidy$estimate[2]` [95% CI: `r heart_rate_model_tidy$conf.low[2]`, `r heart_rate_model_tidy$conf.high[2]`]). Heart rate was seen to rise over time (i.e., each minute) in the control condition (beats.minute$^{-1}$ = `r heart_rate_model_tidy$estimate[4]` [95% CI: `r heart_rate_model_tidy$conf.low[4]`, `r heart_rate_model_tidy$conf.high[4]`]), but heart rates were approximately similar by the end of the warmup such that, given it's higher average heart rate throughout, they rose more slowly during the high BFR condition (Condition [High BFR]:Minute interaction; beats.minute$^{-1}$ = `r heart_rate_model_tidy$estimate[6]` [95% CI: `r heart_rate_model_tidy$conf.low[6]`, `r heart_rate_model_tidy$conf.high[6]`]). Heart rate results are seen in figure (@fig-warmup (A)).
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+
+heart_rate_slopes <- estimate_slopes(heart_rate_model, trend = "minute", at = "condition") |>
+  mutate_if(is.numeric, round, 2)
+```
+Heart rate increased over time (i.e., each minute) in the control condition (slope = `r heart_rate_slopes$Coefficient[1]` [95% CI: `r heart_rate_slopes$CI_low[1]`, `r heart_rate_slopes$CI_high[1]`] beats.minute$^{-1}$), low BFR condition (slope = `r heart_rate_slopes$Coefficient[2]` [95% CI: `r heart_rate_slopes$CI_low[2]`, `r heart_rate_slopes$CI_high[2]`] beats.minute$^{-1}$) and the high BFR condition (slope = `r heart_rate_slopes$Coefficient[3]` [95% CI: `r heart_rate_slopes$CI_low[3]`, `r heart_rate_slopes$CI_high[3]`] beats.minute$^{-1}$). However, despite heart rate appearing greater at the beginning of the warm-up for the high BFR condition it was similar between conditions by the end of the warm-up such that (@tbl-heartcontr shows the between condition contrasts at three minute intervals). Heart rate results are seen in figure (@fig-warmup (A)).
+
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| label: tbl-heartcontr
+#| tbl-cap-location: "top"
+#| tbl-cap: Between condition contrasts across time for heart rate.
+
+heart_rate_contr <- estimate_contrasts(heart_rate_model, at = c("condition", "minute=c(0,3,6,9,12,15,18)")) |>
+  arrange(minute) |>
+  select(c(1:2,4:6)) |>
+  mutate_if(is.numeric, round, 2) |>
+  mutate(
+    Level1 = case_when(
+    Level1 == "no" ~ "Control",
+    Level1 == "low" ~ "Low BFR",
+    Level1 == "high" ~ "High BFR"
+  ),
+  Level2 = case_when(
+    Level2 == "no" ~ "Control",
+    Level2 == "low" ~ "Low BFR",
+    Level2 == "high" ~ "High BFR"
+  )
+  )
+
+knitr::kable(
+  heart_rate_contr,
+  align = "c",
+  col.names = c("Condition 1",
+                "Condition 2",
+                "Contrast",
+                "Lower 95\\% CI",
+                "Upper 95\\% CI"
+                ),
+  escape = FALSE, 
+  booktabs = TRUE
+ 
+) |>
+  footnote(general = c("CI = confidence interval; BFR = blood flow restriction")
+           ) |>
+  kable_classic(full_width = FALSE) |>
+  pack_rows("Baseline", 1,3) |>
+  pack_rows("3 Minutes", 4,6) |>
+  pack_rows("6 Minutes", 7,9) |>
+  pack_rows("9 Minutes", 10,12) |>
+  pack_rows("12 Minutes", 13,15) |>
+  pack_rows("15 Minutes", 16,18) |>
+  pack_rows("18 Minutes", 19,21) |>
+  kableExtra::kable_styling()
+
+```
 
 ### Blood Lactate
-Blood lactate was fit using log transformed values and thus coefficients are given as exponents (i.e., the factor to which a one unit change in the predictor increases or decreases blood lactate). Blood lactate was approximately similar at baseline and increased post warm-up in the control condition by a factor of `r lactate_model_tidy$estimate[4]` [95% CI: `r lactate_model_tidy$conf.low[4]`, `r lactate_model_tidy$conf.high[4]`]. There was a tendency for  blood lactate to increase from pre to post warmup by a greater degree in both the low BFR (Condition [Low BFR]:Timepoint interaction; `r lactate_model_tidy$estimate[5]` [95% CI: `r lactate_model_tidy$conf.low[5]`, `r lactate_model_tidy$conf.high[5]`])) and high BFR conditions (Condition [High BFR]:Timepoint interaction;`r lactate_model_tidy$estimate[6]` [95% CI: `r lactate_model_tidy$conf.low[6]`, `r lactate_model_tidy$conf.high[6]`]), though interval estimates suggested that a lesser degree of change was also compatible with the model and data. Blood lactate results are seen in figure (@fig-warmup (B)).
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+
+
+lactate_slopes <- estimate_slopes(lactate_model, trend = "timepoint", at = "condition")  |>
+  mutate_if(is.numeric, round, 2)
+
+```
+
+Blood lactate was fit using log transformed values and thus values reported here are for the log transformations. Blood lactate results are seen in figure (@fig-warmup (B)) are however on the back transformed raw scale. Blood lactate increased from pre- to post-warm-up in the control condition (slope = `r lactate_slopes$Coefficient[1]` [95% CI: `r lactate_slopes$CI_low[1]`, `r lactate_slopes$CI_high[1]`] log(mmol.L$^{-1}$)), low BFR condition (slope = `r lactate_slopes$Coefficient[2]` [95% CI: `r lactate_slopes$CI_low[2]`, `r lactate_slopes$CI_high[2]`] log(mmol.L$^{-1}$)) and the high BFR condition (slope = `r lactate_slopes$Coefficient[3]` [95% CI: `r lactate_slopes$CI_low[3]`, `r lactate_slopes$CI_high[3]`] log(mmol.L$^{-1}$)). However, there was no clear differences between conditions post-warm-up though a tendency for the high BFR condition to result in greater blood lactate levels (@tbl-lactatecontr shows the between condition contrasts at both timepoints).
+
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| label: tbl-lactatecontr
+#| tbl-cap-location: "top"
+#| tbl-cap: Between condition contrasts at each timepoint for log blood lactate.
+
+lactate_contr <- estimate_contrasts(lactate_model, at = c("condition", "timepoint=c(0,1)")) |>
+  arrange(timepoint) |>
+  select(c(1:2,4:6)) |>
+  mutate(
+    Level1 = case_when(
+    Level1 == "no" ~ "Control",
+    Level1 == "low" ~ "Low BFR",
+    Level1 == "high" ~ "High BFR"
+  ),
+  Level2 = case_when(
+    Level2 == "no" ~ "Control",
+    Level2 == "low" ~ "Low BFR",
+    Level2 == "high" ~ "High BFR"
+  )
+  ) |>
+    mutate_if(is.numeric, round, 2)
+
+
+knitr::kable(
+  lactate_contr,
+  align = "c",
+  col.names = c("Condition 1",
+                "Condition 2",
+                "Contrast",
+                "Lower 95\\% CI",
+                "Upper 95\\% CI"
+                ),
+  escape = FALSE, 
+  booktabs = TRUE
+ 
+) |>
+  footnote(general = c("CI = confidence interval; BFR = blood flow restriction")
+           ) |>
+  kable_classic(full_width = FALSE) |>
+  pack_rows("Pre-warm-up", 1,3) |>
+  pack_rows("Post-warm-up", 4,6) |>
+  kableExtra::kable_styling()
+
+```
 
 ### Rating of Perceived Exertion
-Rating of perceived exertion under the control condition was `r borg_rpe_model_tidy$estimate[1]` [95% CI: `r borg_rpe_model_tidy$conf.low[1]`, `r borg_rpe_model_tidy$conf.high[1]`] points. The low BFR condition resulted in a `r borg_rpe_model_tidy$estimate[2]` [95% CI: `r borg_rpe_model_tidy$conf.low[2]`, `r borg_rpe_model_tidy$conf.high[2]`] points greater rating of perceived exertion compared to the control condition, and the high BFR condition resulted in a `r borg_rpe_model_tidy$estimate[3]` [95% CI: `r borg_rpe_model_tidy$conf.low[3]`, `r borg_rpe_model_tidy$conf.high[3]`] points greater rating of percieved exertion. Rating of perceived exertion results are seen in figure (@fig-warmup (B)).
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+
+borg_rpe_means <- estimate_means(borg_rpe_model) |>
+  mutate_if(is.numeric, round, 2)
+
+borg_rpe_contr <- estimate_contrasts(borg_rpe_model) |>
+  mutate_if(is.numeric, round, 2)
+
+```
+Rating of perceived exertion under the control condition was `r borg_rpe_means$Mean[1]` [95% CI: `r borg_rpe_means$CI_low[1]`, `r borg_rpe_means$CI_high[1]`] points, under the low BFR condition it was `r borg_rpe_means$Mean[2]` [95% CI: `r borg_rpe_means$CI_low[2]`, `r borg_rpe_means$CI_high[2]`] points, and under the high BFR condition it was `r borg_rpe_means$Mean[3]` [95% CI: `r borg_rpe_means$CI_low[3]`, `r borg_rpe_means$CI_high[3]`] points. Compared with the control condition the low BFR condition resulted in a `r borg_rpe_contr$Difference[3]*-1` [95% CI: `r borg_rpe_contr$CI_low[3]*-1`, `r borg_rpe_contr$CI_high[3]*-1`] points greater rating of perceived exertion, and the high BFR condition resulted in a `r borg_rpe_contr$Difference[2]*-1` [95% CI: `r borg_rpe_contr$CI_low[2]*-1`, `r borg_rpe_contr$CI_high[2]*-1`] points greater rating of perceived exertion. The contrast between the low BFR and high BFR conditions was `r borg_rpe_contr$Difference[2]*-1` [95% CI: `r borg_rpe_contr$CI_low[2]*-1`, `r borg_rpe_contr$CI_high[2]*-1`] greater for the high BFR condition. Rating of perceived exertion results are seen in figure (@fig-warmup (B)).
 
 ## Effects of Warm-up on Performance Outcomes
 ```{r}
@@ -114,7 +253,7 @@ Rating of perceived exertion under the control condition was `r borg_rpe_model_t
 #| label: fig-perform
 #| fig-width: 10
 #| fig-height: 10
-#| fig-cap: ADD TEXT.
+#| fig-cap: Individual participant and measurement level data (thin lines) with model predicted values and 95% confidence intervals (thick lines and bands OR points and error bars). Panel (A) shows the results for sit and reach, panel (B) shows the results for countermovement jump, panel (C) shows the results for sprint time, and panel (D) shows the results for isometric mid thigh pull.
 
 targets::tar_load(sit_reach_plot)
 targets::tar_load(cmj_plot)
@@ -132,15 +271,154 @@ targets::tar_load(imtp_plot)
 ```
 
 ### Sit and Reach
-Sit and reach distance tended to improve for the control condition from pre- to post-warm-up by `r sit_reach_model_tidy$estimate[5]` [95% CI: `r sit_reach_model_tidy$conf.low[5]`, `r sit_reach_model_tidy$conf.high[5]`] cm. There was a tendency for improvements from pre- to post-warm-up to be slightly greater in both the low BFR (Condition [Low BFR]:Timepoint interaction; `r sit_reach_model_tidy$estimate[6]` [95% CI: `r sit_reach_model_tidy$conf.low[6]`, `r sit_reach_model_tidy$conf.high[6]`])) and high BFR conditions (Condition [High BFR]:Timepoint interaction;`r sit_reach_model_tidy$estimate[7]` [95% CI: `r sit_reach_model_tidy$conf.low[7]`, `r sit_reach_model_tidy$conf.high[7]`]), though interval estimates suggested that a lesser improvement for these conditions was also compatible with the model and data. Sit and reach results are seen in figure (@fig-perform (A)).
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+
+
+sit_reach_slopes <- estimate_slopes(sit_reach_model, trend = "timepoint", at = "condition")  |>
+  mutate_if(is.numeric, round, 2)
+
+```
+
+Sit and reach increased from pre- to post-warm-up in the control condition (slope = `r sit_reach_slopes$Coefficient[1]` [95% CI: `r sit_reach_slopes$CI_low[1]`, `r sit_reach_slopes$CI_high[1]`] cm), low BFR condition (slope = `r sit_reach_slopes$Coefficient[2]` [95% CI: `r sit_reach_slopes$CI_low[2]`, `r sit_reach_slopes$CI_high[2]`] cm) and the high BFR condition (slope = `r sit_reach_slopes$Coefficient[3]` [95% CI: `r sit_reach_slopes$CI_low[3]`, `r sit_reach_slopes$CI_high[3]`] cm). However, there was no clear differences between conditions post-warm-up (@tbl-sitreachcontr shows the between condition contrasts at both timepoints). Sit and reach results are seen in figure (@fig-perform (A)).
+
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| label: tbl-sitreachcontr
+#| tbl-cap-location: "top"
+#| tbl-cap: Between condition contrasts at each timepoint for sit and reach.
+
+sit_reach_contr <- estimate_contrasts(sit_reach_model, at = c("condition", "timepoint=c(0,1)")) |>
+  arrange(timepoint) |>
+  select(c(1:2,4:6)) |>
+  mutate(
+    Level1 = case_when(
+    Level1 == "no" ~ "Control",
+    Level1 == "low" ~ "Low BFR",
+    Level1 == "high" ~ "High BFR"
+  ),
+  Level2 = case_when(
+    Level2 == "no" ~ "Control",
+    Level2 == "low" ~ "Low BFR",
+    Level2 == "high" ~ "High BFR"
+  )
+  ) |>
+    mutate_if(is.numeric, round, 2)
+
+
+knitr::kable(
+  sit_reach_contr,
+  align = "c",
+  col.names = c("Condition 1",
+                "Condition 2",
+                "Contrast",
+                "Lower 95\\% CI",
+                "Upper 95\\% CI"
+                ),
+  escape = FALSE, 
+  booktabs = TRUE
+ 
+) |>
+  footnote(general = c("CI = confidence interval; BFR = blood flow restriction")
+           ) |>
+  kable_classic(full_width = FALSE) |>
+  pack_rows("Pre-warm-up", 1,3) |>
+  pack_rows("Post-warm-up", 4,6) |>
+  kableExtra::kable_styling()
+
+```
+
 
 ### Countermovement Jump
-Compared with the control condition (`r cmj_model_tidy$estimate[1]` [95% CI: `r cmj_model_tidy$conf.low[1]`, `r cmj_model_tidy$conf.high[1]`] cm) there was a tendency for performance to worse post-warm-up for low BFR (`r cmj_model_tidy$estimate[2]` [95% CI: `r cmj_model_tidy$conf.low[2]`, `r cmj_model_tidy$conf.high[2]`] cm) and moreso for high BFR (`r cmj_model_tidy$estimate[3]` [95% CI: `r cmj_model_tidy$conf.low[3]`, `r cmj_model_tidy$conf.high[3]`] cm). Countermovement jump results are seen in figure (@fig-perform (B)). 
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+
+cmj_means <- estimate_means(cmj_model) |>
+  mutate_if(is.numeric, round, 2)
+
+cmj_contr <- estimate_contrasts(cmj_model) |>
+  mutate_if(is.numeric, round, 2)
+
+```
+Countermovement jump performance under the control condition was `r cmj_means$Mean[1]` [95% CI: `r cmj_means$CI_low[1]`, `r cmj_means$CI_high[1]`] points, under the low BFR condition it was `r cmj_means$Mean[2]` [95% CI: `r cmj_means$CI_low[2]`, `r cmj_means$CI_high[2]`] points, and under the high BFR condition it was `r cmj_means$Mean[3]` [95% CI: `r cmj_means$CI_low[3]`, `r cmj_means$CI_high[3]`] points. Compared with the control condition the low BFR condition resulted in a `r cmj_contr$Difference[3]*-1` [95% CI: `r cmj_contr$CI_low[3]*-1`, `r cmj_contr$CI_high[3]*-1`] cm lower countermovement jump height, and the high BFR condition resulted in a `r cmj_contr$Difference[2]*-1` [95% CI: `r cmj_contr$CI_low[2]*-1`, `r cmj_contr$CI_high[2]*-1`] cm lower countermovement jump height. The contrast between the low BFR and high BFR conditions was `r cmj_contr$Difference[2]*-1` [95% CI: `r cmj_contr$CI_low[2]*-1`, `r cmj_contr$CI_high[2]*-1`] greater for the high BFR condition. Countermovement jump results are seen in figure (@fig-perform (B)).
 
 ### Sprints
-There was essentially no clear effect of either condition compared to the control condition for sprint time, nor any interaction with sprint distance. Sprint time results are seen in figure (@fig-perform (C)).
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+
+sprint_slopes <- estimate_slopes(sprint_model, trend = "distance", at = "condition") |>
+  mutate_if(is.numeric, round, 2)
+```
+The slope for distance in the sprints was essentially the same for all conditions suggesting no impact upon acceleration over 10 to 20 to 30 meters (`r sprint_slopes$Coefficient[1]` [95% CI: `r sprint_slopes$CI_low[1]`, `r sprint_slopes$CI_high[1]`] seconds per meter). Differences between condition at the three distances were also minimal (@tbl-sprintcontr shows the between condition contrasts at each distance) There was essentially no clear effect of either condition compared to the control condition for sprint time, nor any interaction with sprint distance. Sprint time results are seen in figure (@fig-perform (C)).
+
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| label: tbl-sprintcontr
+#| tbl-cap-location: "top"
+#| tbl-cap: Between condition contrasts over distance for sprint time.
+
+sprint_contr <- estimate_contrasts(sprint_model, at = c("condition", "distance=c(10,20,30)")) |>
+  arrange(distance) |>
+  select(c(1:2,4:6)) |>
+  mutate_if(is.numeric, round, 2) |>
+  mutate(
+    Level1 = case_when(
+    Level1 == "no" ~ "Control",
+    Level1 == "low" ~ "Low BFR",
+    Level1 == "high" ~ "High BFR"
+  ),
+  Level2 = case_when(
+    Level2 == "no" ~ "Control",
+    Level2 == "low" ~ "Low BFR",
+    Level2 == "high" ~ "High BFR"
+  )
+  )
+
+knitr::kable(
+  sprint_contr,
+  align = "c",
+  col.names = c("Condition 1",
+                "Condition 2",
+                "Contrast",
+                "Lower 95\\% CI",
+                "Upper 95\\% CI"
+                ),
+  escape = FALSE, 
+  booktabs = TRUE
+ 
+) |>
+  footnote(general = c("CI = confidence interval; BFR = blood flow restriction")
+           ) |>
+  kable_classic(full_width = FALSE) |>
+  pack_rows("10 meters", 1,3) |>
+  pack_rows("20 meters", 4,6) |>
+  pack_rows("30 meters", 7,9) |>
+  kableExtra::kable_styling()
+```
 
 ### Isometric Mid Thigh Pull
-Compared with the control condition (`r imtp_model_tidy$estimate[1]` [95% CI: `r imtp_model_tidy$conf.low[1]`, `r imtp_model_tidy$conf.high[1]`] N) there little impact upon performance post-warm-up for low BFR (`r imtp_model_tidy$estimate[2]` [95% CI: `r imtp_model_tidy$conf.low[2]`, `r imtp_model_tidy$conf.high[2]`] N) and for high BFR (`r imtp_model_tidy$estimate[3]` [95% CI: `r imtp_model_tidy$conf.low[3]`, `r imtp_model_tidy$conf.high[3]`] N). Isometric Mid Thigh Pull results are seen in figure (@fig-perform (D)). 
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+
+imtp_means <- estimate_means(imtp_model) |>
+  mutate_if(is.numeric, round, 2)
+
+imtp_contr <- estimate_contrasts(imtp_model) |>
+  mutate_if(is.numeric, round, 2)
+
+```
+Countermovement jump performance under the control condition was `r imtp_means$Mean[1]` [95% CI: `r imtp_means$CI_low[1]`, `r imtp_means$CI_high[1]`] N, under the low BFR condition it was `r imtp_means$Mean[2]` [95% CI: `r imtp_means$CI_low[2]`, `r imtp_means$CI_high[2]`] N, and under the high BFR condition it was `r imtp_means$Mean[3]` [95% CI: `r imtp_means$CI_low[3]`, `r imtp_means$CI_high[3]`] N. There were neglible differences between conditions. Compared with the control condition the low BFR condition resulted in a `r imtp_contr$Difference[3]*-1` [95% CI: `r imtp_contr$CI_low[3]*-1`, `r imtp_contr$CI_high[3]*-1`] cm lower countermovement jump height, and the high BFR condition resulted in a `r imtp_contr$Difference[2]*-1` [95% CI: `r imtp_contr$CI_low[2]*-1`, `r imtp_contr$CI_high[2]*-1`] cm lower countermovement jump height. The contrast between the low BFR and high BFR conditions was `r imtp_contr$Difference[2]*-1` [95% CI: `r imtp_contr$CI_low[2]*-1`, `r imtp_contr$CI_high[2]*-1`] greater for the high BFR condition. Isometric mid thigh pull results are seen in figure (@fig-perform (D)).
 
 # References
