@@ -29,116 +29,118 @@ library(patchwork)
 
 # Statistical Analysis
 
-The present analysis was not pre-registered as we had no a priori hypotheses and thus was considered exploratory. Inferential statistics were treated as highly unstable local descriptions of the relations between model assumptions and data in order to acknowledge the inherent uncertainty in drawing generalised inferences from single and small samples [@amrheinInferentialStatisticsDescriptive2019]. For all analyses we opted to avoid dichotomising the existence of effects and therefore did not employ traditional null hypothesis significance testing on parameter estimates [@amrheinScientistsRiseStatistical2019; @mcshaneAbandonStatisticalSignificance2019], though model summary tables do include p values descriptively. Instead, we opted to take an estimation-based approach [@cummingNewStatisticsWhy2014]. For all analyses model parameter estimates and their precision, along with conclusions based upon them, were interpreted continuously and probabilistically, considering data quality, plausibility of effect, and previous literature, all within the context of each model. We focused primarily on qualitative examination of our results based on visualization of the data and models for fixed effects. All analysis was performed in R (version 4.3.3, The R Foundation for Statistical Computing, 2022) and all data and code is presented in the supplementary materials [https://osf.io/ugbtd/](https://osf.io/ugbtd/).All data visualisations were made using `ggplot2` [@wickhamGgplot2CreateElegant2022], `ggeffects` [@ludeckeGgeffectsCreateTidy2024] and the `patchwork` [@pedersenPatchworkComposerPlots2022] packages. The aim of our analysis was to explore to explore the effects of both low and high BFR conditions upon physiological and perceptual parameters during the warm-up, and on performance outcomes as a result of the warm-up. Linear mixed effects models were used with Restricted Maximal Likelihood estimation using the `lme4` package [@batesLme4LinearMixedEffects2023]. Given the variety of outcomes examined, the timing of their data collection (e.g., pre- to post-warm-up, during warm-up, or post-warm-up only), and the number of measurements taken (e.g., single measures or multiple measures) we describe all of the specific model structures, in addition to model checks and diagnostics using the `performance` package [@ludecke@strengejackePerformanceAssessmentRegression2024a], in the online supplementary materials (download and view html file from: [https://osf.io/4jtzu](https://osf.io/4jtzu)). Where possible we utilised maximal random effects structures for the data (i.e., as long as there were sufficient degrees of freedom, convergence could be acheived, and singularity was avoided). 
+The present analysis was not pre-registered as we had no a priori hypotheses and thus was considered exploratory. Inferential statistics were treated as highly unstable local descriptions of the relations between model assumptions and data in order to acknowledge the inherent uncertainty in drawing generalised inferences from single and small samples [@amrheinInferentialStatisticsDescriptive2019]. For all analyses we opted to avoid dichotomising the existence of effects and therefore did not employ traditional null hypothesis significance testing on parameter estimates [@amrheinScientistsRiseStatistical2019; @mcshaneAbandonStatisticalSignificance2019]. Instead, we opted to take an estimation-based approach [@cummingNewStatisticsWhy2014]. For all analyses model parameter estimates and their precision (i.e., 95% confidence intervals [CI]), along with conclusions based upon them, were interpreted continuously and probabilistically, considering data quality, plausibility of effect, and previous literature, all within the context of each model. We focused primarily on qualitative examination of our results based on visualization of the data and models for fixed effects. All analysis was performed in R (version 4.3.3, The R Foundation for Statistical Computing, 2022) and all data and code is presented in the supplementary materials ([https://osf.io/ugbtd/](https://osf.io/ugbtd/)).All data visualisations were made using `ggplot2` [@wickhamGgplot2CreateElegant2022], `ggeffects` [@ludeckeGgeffectsCreateTidy2024] and the `patchwork` [@pedersenPatchworkComposerPlots2022] packages. The aim of our analysis was to explore to explore the effects of both low and high BFR conditions upon physiological and perceptual parameters during the warm-up, and on performance outcomes as a result of the warm-up. Linear mixed effects models were used with Restricted Maximal Likelihood estimation using the `lme4` package [@batesLme4LinearMixedEffects2023]. Given the variety of outcomes examined, the timing of their data collection (e.g., pre- to post-warm-up, during warm-up, or post-warm-up only), and the number of measurements taken (e.g., single measures or multiple measures) we describe all of the specific model structures, in addition to model checks and diagnostics using the `performance` package [@strengejackePerformanceAssessmentRegression2024a], in the online supplementary materials (download and view html file from: [https://osf.io/4jtzu](https://osf.io/4jtzu)). Where possible we utilised maximal random effects structures for the data (i.e., as long as there were sufficient degrees of freedom, convergence could be achieved, and singularity was avoided).
 
 # Results
+```{r} 
+#| message: false
+#| warning: false
+#| echo: false
+
+targets::tar_load(c(
+  sit_reach_model_tidy,
+  lactate_model_tidy,
+  borg_rpe_model_tidy,
+  heart_rate_model_tidy,
+  cmj_model_tidy,
+  sprint_model_tidy,
+  imtp_model_tidy
+))
+
+sit_reach_model_tidy <- sit_reach_model_tidy |>
+  mutate_if(is.numeric, round, 2)
+
+lactate_model_tidy <- lactate_model_tidy |>
+  mutate_at(c("estimate", "conf.low", "conf.high"), exp) |> 
+  mutate_if(is.numeric, round, 2)
+
+borg_rpe_model_tidy <- borg_rpe_model_tidy |>
+  mutate_if(is.numeric, round, 2)
+
+heart_rate_model_tidy <- heart_rate_model_tidy |>
+  mutate_if(is.numeric, round, 2)
+
+cmj_model_tidy <- cmj_model_tidy |>
+  mutate_if(is.numeric, round, 2)
+
+sprint_model_tidy <- sprint_model_tidy |>
+  mutate_if(is.numeric, round, 4)
+
+imtp_model_tidy <- imtp_model_tidy |>
+  mutate_if(is.numeric, round, 2)
+
+```
+
+Full model summaries including all fixed effect parameter estimates, their confidence intervals, and p values, in addition to all random effect estimates and their correlations, are provided in the online supplementary materials (download and view html file from: [https://osf.io/3bdwt](https://osf.io/3bdwt)). Here we focus on presenting the key results for the effects of condition, or condition:time interaction effects (i.e., where timepoint was pre- to post-warm-up or multiple measures where taken during warm-up such as heart rate each minute).
+
 ## Effects of Warm-up on Physiological and Perceptual Outcomes
 
-```{r} 
-#| message: false
-#| warning: false
-#| echo: false
-
-test <- left_join(heart_rate_model_tidy, lactate_model_tidy, by = c("effect", "group", "term"))
-# 
-# 
-# targets::tar_load(tidy_model)
-# 
-# tidy_model <- tidy_model[c(4,5,7,8)] %>%
-#     mutate_if(is.numeric, round, 2)
-# 
-# tidy_model$term <- recode(tidy_model$term,
-#                         "(Intercept)" = "$Intercept$",
-#                         "zelemiq_avg_z" = "$\\operatorname{Zelemiq}^*_{linear\\space term}$",
-#                         "Izelemiq_avg_zE2" = "$\\operatorname{Zelemiq}^*_{quadratic\\space term}$",
-#                         "sd__(Intercept)" = "$\\sigma_{Intercept}$",  
-#                         "sd__zelemiq_avg_z" = "$\\sigma_{\\operatorname{Zelemiq}^*_{linear\\space term}}$",
-#                         "cor__(Intercept).zelemiq_avg_z" = "$\\rho_{Intercept:\\operatorname{Zelemiq}^*_{linear\\space term}}$",
-#                         "sd__Observation" = "$\\sigma_{Residual}$")
-
-```
-
-Model parameters estimates and 95% quantile intervals are shown in @tbl-model and @fig-model panel (A) shows the raw data and model predictions for each individual participant in addition to the participant level in panel (B) and model predictions in panel (C). The $\operatorname{Zelemiq}^*_{linear\space term}$ indicated that  the rate of change in blood lactate at a standardised Zelemiq value of zero was `r tidy_model[2,2]` [95% quantile interval: `r tidy_model[2,3]`, `r tidy_model[2,4]`] and the positive $\operatorname{Zelemiq}^*_{quadratic\space term}$ was `r tidy_model[3,2]` [95% quantile interval: `r tidy_model[3,3]`, `r tidy_model[3,4]`] indicating a convex curve. Thus, blood lactate in standardised units increased exponentially with increasing Zelemiq standardised values. The random effects parameter estimates from the Bayesian model were negligible as expected given the singularity of the Frequentist model fit with Restricted Maximum Likelihood. The majority of variance in the model was attributable to the residual variation. 
-
-```{r} 
-#| message: false
-#| warning: false
-#| echo: false
-#| label: tbl-model 
-#| tbl-cap-location: "top"
-#| tbl-cap: Model parameter estimates for both fixed and random effects.
-
-
-knitr::kable(
-  tidy_model,
-  align = c("l","c","c","c"),
-  col.names = c("Model Term",
-                "Estimate",
-                "Lower 95\\% QI",
-                "Upper 95\\% QI"
-                ),
-  escape = FALSE, 
-  booktabs = TRUE
- 
-) %>%
-  footnote(general = c("QI = quantile interval","Note, estimates are in standard deviation units at the individual participant level.")
-           ) %>%
-  row_spec(0, bold = TRUE) %>%
-  kable_classic(full_width = FALSE) %>%
-  pack_rows("Fixed Effects", 1,3) %>%
-  pack_rows("Random Effects", 4,7) %>%
-  kableExtra::kable_styling()
-
-```
-
-\newpage
-
-\blandscape
 ```{r}
 #| message: false
 #| warning: false
 #| echo: false
-#| label: fig-model 
-#| fig-width: 20
-#| fig-height: 14
-#| fig-cap: Panel (A) shows the standardised values for raw Zelemiq sensor output and Biosen C-Line blood lactate during the course of the incremental test where time has been normalised to 0-100% of the test duration and a locally estimated scatter smooth (LOESS) curve for each has been performed; panel (B) shows the individual participant level predicted values (thick lines) with 95% quantile intervals (ribbons) from the fitted model; panel (C) shows the global grand mean estimate (thick line) from the model with 95% quantile interval (dark grey ribbon) in addition to intervals for the conditional effects including the random effects of participants (lighter grey ribbon) and the posterior predictions (lightest grey ribbon). Individual points in each panel are the individual observed values of data; and panel (D) shows the scatterplots of lactate thresholds detected from either Zelemiq or blood lactate values using Dmax, Exp-Dmax, LTP1, LTP2, and ModDmax.
+#| label: fig-warmup 
+#| fig-width: 10
+#| fig-height: 10
+#| fig-cap: ADD TEXT.
 
-targets::tar_load(individual_data_plot)
-targets::tar_load(individual_preds_plot)
-targets::tar_load(model_plot)
-targets::tar_load(thresholds_agree_plot)
+targets::tar_load(heart_rate_plot)
+targets::tar_load(lactate_plot)
+targets::tar_load(borg_rpe_plot)
 
-(((individual_data_plot / individual_preds_plot) | model_plot) / thresholds_agree_plot) +
-    plot_annotation(tag_level = "A",
-                    tag_prefix = "(", tag_suffix = ")") +
-    plot_layout(heights = c(10,4)) &
-    theme(axis.title = element_text(size = 13),
-          axis.text = element_text(size = 10))
+((heart_rate_plot + guides(color = "none")) / (lactate_plot  | borg_rpe_plot))  +
+    plot_layout(guides = "collect")  +
+    plot_annotation(
+      tag_levels = "A",
+      title = "Effects of Warmup on Physiological and Perceptual Outcomes"
+    ) & 
+    theme(legend.position = "bottom")
 ```
-\elandscape
 
-```{r} 
+### Heart Rate
+On average heart rate was typically higher during the high BFR condition compared with the control condition (beats.minute$^{-1}$ = `r heart_rate_model_tidy$estimate[3]` [95% CI: `r heart_rate_model_tidy$conf.low[3]`, `r heart_rate_model_tidy$conf.high[3]`]), though not clearly so with the low BFR condition (beats.minute$^{-1}$ = `r heart_rate_model_tidy$estimate[2]` [95% CI: `r heart_rate_model_tidy$conf.low[2]`, `r heart_rate_model_tidy$conf.high[2]`]). Heart rate was seen to rise over time (i.e., each minute) in the control condition (beats.minute$^{-1}$ = `r heart_rate_model_tidy$estimate[4]` [95% CI: `r heart_rate_model_tidy$conf.low[4]`, `r heart_rate_model_tidy$conf.high[4]`]), but heart rates were approximately similar by the end of the warmup such that, given it's higher average heart rate throughout, they rose more slowly during the high BFR condition (Condition [High BFR]:Minute interaction; beats.minute$^{-1}$ = `r heart_rate_model_tidy$estimate[6]` [95% CI: `r heart_rate_model_tidy$conf.low[6]`, `r heart_rate_model_tidy$conf.high[6]`]). Heart rate results are seen in figure (@fig-warmup (A)).
+
+### Blood Lactate
+Blood lactate was fit using log transformed values and thus coefficients are given as exponents (i.e., the factor to which a one unit change in the predictor increases or decreases blood lactate). Blood lactate was approximately similar at baseline and increased post warm-up in the control condition by a factor of `r lactate_model_tidy$estimate[4]` [95% CI: `r lactate_model_tidy$conf.low[4]`, `r lactate_model_tidy$conf.high[4]`]. There was a tendency for  blood lactate to increase from pre to post warmup by a greater degree in both the low BFR (Condition [Low BFR]:Timepoint interaction; `r lactate_model_tidy$estimate[5]` [95% CI: `r lactate_model_tidy$conf.low[5]`, `r lactate_model_tidy$conf.high[5]`])) and high BFR conditions (Condition [High BFR]:Timepoint interaction;`r lactate_model_tidy$estimate[6]` [95% CI: `r lactate_model_tidy$conf.low[6]`, `r lactate_model_tidy$conf.high[6]`]), though interval estimates suggested that a lesser degree of change was also compatible with the model and data. Blood lactate results are seen in figure (@fig-warmup (B)).
+
+### Rating of Perceived Exertion
+Rating of perceived exertion under the control condition was `r borg_rpe_model_tidy$estimate[1]` [95% CI: `r borg_rpe_model_tidy$conf.low[1]`, `r borg_rpe_model_tidy$conf.high[1]`] points. The low BFR condition resulted in a `r borg_rpe_model_tidy$estimate[2]` [95% CI: `r borg_rpe_model_tidy$conf.low[2]`, `r borg_rpe_model_tidy$conf.high[2]`] points greater rating of perceived exertion compared to the control condition, and the high BFR condition resulted in a `r borg_rpe_model_tidy$estimate[3]` [95% CI: `r borg_rpe_model_tidy$conf.low[3]`, `r borg_rpe_model_tidy$conf.high[3]`] points greater rating of percieved exertion. Rating of perceived exertion results are seen in figure (@fig-warmup (B)).
+
+## Effects of Warm-up on Performance Outcomes
+```{r}
 #| message: false
 #| warning: false
 #| echo: false
+#| label: fig-perform
+#| fig-width: 10
+#| fig-height: 10
+#| fig-cap: ADD TEXT.
 
-targets::tar_load(model)
+targets::tar_load(sit_reach_plot)
+targets::tar_load(cmj_plot)
+targets::tar_load(sprint_plot)
+targets::tar_load(imtp_plot)
 
+
+((sit_reach_plot + guides(color = "none")) + cmj_plot + sprint_plot + imtp_plot) +  
+    plot_layout(guides = "collect")  +
+    plot_annotation(
+      tag_levels = "A",
+      title = "Effects of Warmup on Performance Outcomes"
+    ) & 
+    theme(legend.position = "bottom")
 ```
 
-## Agreement of lactate thresholds detected using blood lactate values compared to Zelemiq values
-```{r} 
-#| message: false
-#| warning: false
-#| echo: false
+### Sit and Reach
+Sit and reach distance tended to improve for the control condition from pre- to post-warm-up by `r sit_reach_model_tidy$estimate[5]` [95% CI: `r sit_reach_model_tidy$conf.low[5]`, `r sit_reach_model_tidy$conf.high[5]`] cm. There was a tendency for improvements from pre- to post-warm-up to be slightly greater in both the low BFR (Condition [Low BFR]:Timepoint interaction; `r sit_reach_model_tidy$estimate[6]` [95% CI: `r sit_reach_model_tidy$conf.low[6]`, `r sit_reach_model_tidy$conf.high[6]`])) and high BFR conditions (Condition [High BFR]:Timepoint interaction;`r sit_reach_model_tidy$estimate[7]` [95% CI: `r sit_reach_model_tidy$conf.low[7]`, `r sit_reach_model_tidy$conf.high[7]`]), though interval estimates suggested that a lesser improvement for these conditions was also compatible with the model and data. Sit and reach results are seen in figure (@fig-perform (A)).
 
-targets::tar_load(thresholds_agree) 
+### Countermovement Jump
+Compared with the control condition (`r cmj_model_tidy$estimate[1]` [95% CI: `r cmj_model_tidy$conf.low[1]`, `r cmj_model_tidy$conf.high[1]`] cm) there was a tendency for performance to worse post-warm-up for low BFR (`r cmj_model_tidy$estimate[2]` [95% CI: `r cmj_model_tidy$conf.low[2]`, `r cmj_model_tidy$conf.high[2]`] cm) and moreso for high BFR (`r cmj_model_tidy$estimate[3]` [95% CI: `r cmj_model_tidy$conf.low[3]`, `r cmj_model_tidy$conf.high[3]`] cm). Countermovement jump results are seen in figure (@fig-perform (B)). 
 
-thresholds_agree <- thresholds_agree |>
-    mutate_if(is.numeric, round, 2)
+### Sprints
+There was essentially no clear effect of either condition compared to the control condition for sprint time, nor any interaction with sprint distance. Sprint time results are seen in figure (@fig-perform (C)).
 
-```
-
-Scatterplots of lactate thresholds calculated from either blood lactate or from the Zelemiq values using either Dmax, Exp-Dmax, LTP1, LTP2, or ModDmax can be see in @fig-model panel (D). In comparing the two devices there appeared to be the greatest agreement in threshold detected when using the ModDmax method with a bias of `r thresholds_agree[2,2]` [95% confidence interval:`r thresholds_agree[2,3]`,`r thresholds_agree[2,4]`] Watts and lower and upper 95% limits of agreement of bias of `r thresholds_agree[2,5]` [95% confidence interval:`r thresholds_agree[2,6]`,`r thresholds_agree[2,7]`] and bias of `r thresholds_agree[2,8]` [95% confidence interval:`r thresholds_agree[2,9]`,`r thresholds_agree[2,10]`] Watts respectively. For the ModDmax method the $\rho_{CCC}$`r thresholds_agree[2,11]` [95% confidence interval:`r thresholds_agree[2,12]`,`r thresholds_agree[2,13]`].
+### Isometric Mid Thigh Pull
+Compared with the control condition (`r imtp_model_tidy$estimate[1]` [95% CI: `r imtp_model_tidy$conf.low[1]`, `r imtp_model_tidy$conf.high[1]`] N) there little impact upon performance post-warm-up for low BFR (`r imtp_model_tidy$estimate[2]` [95% CI: `r imtp_model_tidy$conf.low[2]`, `r imtp_model_tidy$conf.high[2]`] N) and for high BFR (`r imtp_model_tidy$estimate[3]` [95% CI: `r imtp_model_tidy$conf.low[3]`, `r imtp_model_tidy$conf.high[3]`] N). Isometric Mid Thigh Pull results are seen in figure (@fig-perform (D)). 
 
 # References
