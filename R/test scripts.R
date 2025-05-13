@@ -33,57 +33,18 @@ targets::tar_load(c(
   imtp_plot
 ))
 
-sit_reach_plot + 
-  guides(color = "none")
+library(marginaleffects)
 
-(sit_reach_plot + 
-lactate_plot +
-borg_rpe_plot +
-heart_rate_plot +
-cmj_plot +
-sprint_plot +
-imtp_plot)
+avg_comparisons(sit_reach_model)
 
-((heart_rate_plot + guides(color = "none")) / (lactate_plot  | borg_rpe_plot))  +
-  plot_layout(guides = "collect")  +
-  plot_annotation(
-    tag_levels = "A",
-    title = "Effects of Warmup on Physiological and Perceptual Outcomes"
-  ) & 
-  theme(legend.position = "bottom")
+plot_comparisons(sit_reach_model, condition = "condition", variables = "timepoint")
+
+library(modelbased)
 
 
-ggsave("warmup.tiff",
-       device = "tiff",
-       dpi = 300,
-       w = 10,
-       h = 10)
+estimate_slopes(lactate_model, trend = "timepoint", at = "condition")
 
 
-((sit_reach_plot + guides(color = "none")) + cmj_plot + sprint_plot + imtp_plot) +  
-plot_layout(guides = "collect")  +
-  plot_annotation(
-    tag_levels = "A",
-    title = "Effects of Warmup on Performance Outcomes"
-  ) & 
-  theme(legend.position = "bottom")
+estimate_means(sprint_model)
 
-ggsave("perform.tiff",
-       device = "tiff",
-       dpi = 300,
-       w = 10,
-       h = 10)
-
-
-
-
-
-ggsave("sit_reach_plot.tiff",
-       device = "tiff",
-       dpi = 300,
-       w = 5,
-       h = 2.5)
-
-
-
-
+estimate_contrasts(borg_rpe_model)
